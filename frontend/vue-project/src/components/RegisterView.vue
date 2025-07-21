@@ -1,56 +1,67 @@
-<!-- src/components/LoginView.vue -->
+<!-- src/components/RegisterView.vue -->
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { LogIn } from 'lucide-vue-next'; // 引入图标
+import { UserPlus } from 'lucide-vue-next';
+
+// 定义emits，用于通知父组件注册成功
 
 const authStore = useAuthStore()
-const username = ref('admin')
-const password = ref('password123')
-const emit = defineEmits(['go-to-register'])
-async function handleLogin() {
-  await authStore.login(username.value, password.value)
+const name = ref('')
+const username = ref('')
+const password = ref('')
+const emit = defineEmits(['register-success', 'go-to-login'])
+
+async function handleRegister() {
+  const success = await authStore.register(name.value, username.value, password.value)
+  if (success) {
+    // 注册成功后，触发事件通知父组件
+    emit('register-success');
+  }
 }
 </script>
 
 <template>
-  <div class="login-container">
-    <div class="login-box">
-      <h1>欢迎回来</h1>
-      <p class="subtitle">请输入您的凭据以继续</p>
-      <form @submit.prevent="handleLogin">
+  <div class="register-container">
+    <div class="register-box">
+      <h1>创建账户</h1>
+      <p class="subtitle">加入我们，开启新的旅程</p>
+      <form @submit.prevent="handleRegister">
         <div class="input-group">
-          <input type="text" v-model="username" required placeholder="用户名 (admin)">
+          <input type="text" v-model="name" required placeholder="昵称">
         </div>
         <div class="input-group">
-          <input type="password" v-model="password" required placeholder="密码 (password123)">
+          <input type="text" v-model="username" required placeholder="用户名">
         </div>
-        <div v-if="authStore.error" class="error-message">
-          {{ authStore.error }}
+        <div class="input-group">
+          <input type="password" v-model="password" required placeholder="密码">
+        </div>
+        <div v-if="authStore.registerError" class="error-message">
+          {{ authStore.registerError }}
         </div>
         <button type="submit" :disabled="authStore.loading">
           <span v-if="authStore.loading" class="spinner"></span>
-          <LogIn v-else :size="18" />
-          <span>{{ authStore.loading ? '登录中...' : '登 录' }}</span>
+          <UserPlus v-else :size="18" />
+          <span>{{ authStore.loading ? '注册中...' : '注 册' }}</span>
         </button>
       </form>
     </div>
   </div>
     <div class="switch-view">
-    没有账户？ <a href="#" @click.prevent="emit('go-to-register')">立即注册</a>
+    已有账户？ <a href="#" @click.prevent="emit('go-to-login')">返回登录</a>
   </div>
 </template>
 
 <style scoped>
-/* 这里添加精美的样式 */
-.login-container {
+/* 样式可以复用或微调LoginView的样式 */
+.register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   perspective: 1000px;
 }
 
-.login-box {
+.register-box {
   width: 360px;
   padding: 40px;
   background: var(--glass-bg);
@@ -58,12 +69,6 @@ async function handleLogin() {
   border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease;
-}
-
-.login-box:hover {
-    transform: rotateY(5deg) rotateX(5deg);
 }
 
 h1 {
@@ -91,11 +96,6 @@ input {
   border-radius: 8px;
   color: var(--text-color);
   font-size: 1rem;
-  transition: all 0.3s ease;
-}
-
-input::placeholder {
-  color: rgba(255, 255, 255, 0.5);
 }
 
 input:focus {
@@ -107,7 +107,7 @@ input:focus {
 button {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  background: linear-gradient(45deg, #28a745, #218838); /* 绿色渐变 */
   border: none;
   border-radius: 8px;
   color: white;
@@ -119,16 +119,6 @@ button {
   align-items: center;
   justify-content: center;
   gap: 10px;
-}
-
-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
-}
-
-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
 }
 
 .error-message {
@@ -149,9 +139,7 @@ button:disabled {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .switch-view {
   margin-top: 20px;
