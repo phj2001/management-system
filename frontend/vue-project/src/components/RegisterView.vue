@@ -1,27 +1,26 @@
-<!-- src/components/RegisterView.vue -->
 <script setup>
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { UserPlus } from 'lucide-vue-next';
 
-// 定义emits，用于通知父组件注册成功
+// 定义emits，用于通知父组件
+const emit = defineEmits(['register-success', 'go-to-login']);
 
 const authStore = useAuthStore()
 const name = ref('')
 const username = ref('')
 const password = ref('')
-const emit = defineEmits(['register-success', 'go-to-login'])
 
 async function handleRegister() {
   const success = await authStore.register(name.value, username.value, password.value)
   if (success) {
-    // 注册成功后，触发事件通知父组件
     emit('register-success');
   }
 }
 </script>
 
 <template>
+  <!-- 关键修改：用一个 div 作为唯一的根元素 -->
   <div class="register-container">
     <div class="register-box">
       <h1>创建账户</h1>
@@ -45,20 +44,22 @@ async function handleRegister() {
           <span>{{ authStore.loading ? '注册中...' : '注 册' }}</span>
         </button>
       </form>
+      <!-- 将切换链接移动到 box 内部 -->
+      <div class="switch-view">
+        已有账户？ <a href="#" @click.prevent="emit('go-to-login')">返回登录</a>
+      </div>
     </div>
-  </div>
-    <div class="switch-view">
-    已有账户？ <a href="#" @click.prevent="emit('go-to-login')">返回登录</a>
   </div>
 </template>
 
 <style scoped>
-/* 样式可以复用或微调LoginView的样式 */
+/* 样式与 LoginView 保持一致，只是按钮颜色不同 */
 .register-container {
   display: flex;
   justify-content: center;
   align-items: center;
   perspective: 1000px;
+  width: 100%;
 }
 
 .register-box {

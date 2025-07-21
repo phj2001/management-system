@@ -1,19 +1,20 @@
-<!-- src/components/LoginView.vue -->
 <script setup>
+const emit = defineEmits(['go-to-register']);
 import { ref } from 'vue'
 import { useAuthStore } from '@/stores/auth'
-import { LogIn } from 'lucide-vue-next'; // 引入图标
+import { LogIn } from 'lucide-vue-next';
 
 const authStore = useAuthStore()
 const username = ref('admin')
 const password = ref('password123')
-const emit = defineEmits(['go-to-register'])
+
 async function handleLogin() {
   await authStore.login(username.value, password.value)
 }
 </script>
 
 <template>
+  <!-- 关键修改：用一个 div 作为唯一的根元素 -->
   <div class="login-container">
     <div class="login-box">
       <h1>欢迎回来</h1>
@@ -34,20 +35,22 @@ async function handleLogin() {
           <span>{{ authStore.loading ? '登录中...' : '登 录' }}</span>
         </button>
       </form>
+      <!-- 将切换链接移动到 box 内部 -->
+      <div class="switch-view">
+        没有账户？ <a href="#" @click.prevent="emit('go-to-register')">立即注册</a>
+      </div>
     </div>
-  </div>
-    <div class="switch-view">
-    没有账户？ <a href="#" @click.prevent="emit('go-to-register')">立即注册</a>
   </div>
 </template>
 
 <style scoped>
-/* 这里添加精美的样式 */
+/* 样式保持不变，但因为结构变化，login-container 的样式现在应用在根 div 上 */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
   perspective: 1000px;
+  width: 100%; /* 确保它占满可用空间 */
 }
 
 .login-box {
